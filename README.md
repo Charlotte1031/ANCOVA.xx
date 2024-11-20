@@ -1,5 +1,5 @@
 
-# Statistical Analysis Functions and Demo
+# ANCOVA.xx
 
 This repository contains a suite of R functions designed to perform essential statistical analyses, including ANOVA, ANCOVA, and regression analyses, along with accompanying visualization functions. A detailed demo vignette is also provided to illustrate the application of these functions in various scenarios.
 
