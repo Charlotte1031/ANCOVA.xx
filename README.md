@@ -29,7 +29,7 @@ Each function includes a plotting feature to facilitate the visualization of res
 
 1. Clone the repository:
    ```bash
-   https://github.com/Charlotte1031/ANCOVA.git
+   https://github.com/Charlotte1031/ANCOVA.xx.git
    ```
 2.	Load the functions in your R environment:
 
