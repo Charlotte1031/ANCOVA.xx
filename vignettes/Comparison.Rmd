@@ -1,0 +1,207 @@
+---
+title: "Comparison of ANCOVA.xx with Base R Functions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\\VignetteIndexEntry{Comparison of ANCOVA.xx with Base R Functions}
+  %\\VignetteEngine{knitr::rmarkdown}
+  %\\VignetteEncoding{UTF-8}
+---
+
+# Comparison of ANCOVA.xx with Base R Functions
+
+This vignette compares the functionality, efficiency, and flexibility of the ANCOVA.xx package with base R functions such as lm and anova. Examples use both real-world and simulated datasets.
+
+```{r}
+# Load required packages
+library(ANCOVA.xx)
+if (!requireNamespace("bench", quietly = TRUE)) {
+  install.packages("bench")
+}
+library(bench)
+# Load the dataset
+data(mtcars)
+
+```
+
+## Real-World Dataset Comparison: mtcars
+
+### Regression: lm vs. run_regression
+
+```{r example, echo = TRUE}
+# Using updated run_regression
+custom_model <- run_regression(mtcars, response = "mpg", predictors = c("wt", "hp"))
+
+# Using lm
+base_model <- lm(mpg ~ wt + hp, data = mtcars)
+
+# Compare coefficients
+print(all.equal(as.numeric(custom_model$coefficients), as.numeric(coef(base_model)), tolerance = 1e-5))
+
+# Compare R-squared
+print(all.equal(custom_model$r_squared, summary(base_model)$r.squared, tolerance = 1e-5))
+
+bench_coefficients <- bench::mark(
+  run_regression = {
+    custom_model <- run_regression(mtcars, response = "mpg", predictors = c("wt", "hp"))
+    as.numeric(custom_model$coefficients)  # Extract coefficients
+  },
+  lm = {
+    base_model <- lm(mpg ~ wt + hp, data = mtcars)
+    as.numeric(coef(base_model))  # Extract coefficients
+  },
+  iterations = 100
+)
+
+print("Coefficient Computation Benchmark:")
+print(bench_coefficients)
+```
+
+### ANOVA: anova vs. compare_anova
+```{r}
+# Fit models for ANOVA
+base_model1 <- lm(mpg ~ wt, data = mtcars)
+base_model2 <- lm(mpg ~ wt + hp, data = mtcars)
+
+# Base R ANOVA
+base_anova <- anova(base_model1, base_model2)
+print("Base R ANOVA Results:")
+print(base_anova)
+
+# Using compare_anova
+custom_model1 <- run_regression(mtcars, response = "mpg", predictors = c("wt"))
+custom_model2 <- run_regression(mtcars, response = "mpg", predictors = c("wt", "hp"))
+custom_anova <- compare_anova(models = list(custom_model1, custom_model2))
+print("Custom ANOVA Results:")
+print(custom_anova)
+
+# Compare F-values
+f_value_comparison <- all.equal(
+  custom_anova$F_value[2],
+  base_anova$F[2],
+  tolerance = 1e-5
+)
+print(paste("F-value comparison:", f_value_comparison))
+
+# Compare p-values
+p_value_comparison <- all.equal(
+  custom_anova$p_value[2],
+  base_anova$`Pr(>F)`[2],
+  tolerance = 1e-5
+)
+print(paste("P-value comparison:", p_value_comparison))
+
+
+# Benchmark ANOVA (numeric values only)
+bench_anova <- bench::mark(
+  compare_anova = {
+    compare_anova(models = list(custom_model1, custom_model2))$F_value[2]
+  },
+  base_anova = {
+    anova(base_model1, base_model2)$F[2]
+  },
+  iterations = 100
+)
+
+
+print("ANOVA Benchmark:")
+print(bench_anova)
+```
+
+### ANCOVA: aov vs. compare_ancova
+
+```{r}
+
+
+custom_ancova <- compare_ancova(
+  models = list(
+    run_regression(mtcars, response = "mpg", predictors = c("wt")),
+    run_regression(mtcars, response = "mpg", predictors = c("wt", "hp"))
+  ),
+  covariates = c("wt", "hp"),
+  data = mtcars
+)
+print(custom_ancova)
+base_ancova <- aov(mpg ~ wt + hp, data = mtcars)
+summary_base_ancova <- summary(base_ancova)
+
+# Compare F-values and p-values for "hp"
+base_f_value_hp <- summary_base_ancova[[1]]$`F value`[2]
+base_p_value_hp <- summary_base_ancova[[1]]$`Pr(>F)`[2]
+
+custom_f_value_hp <- custom_ancova$F_value[custom_ancova$Covariate == "hp" & custom_ancova$Model == "Model_2"]
+custom_p_value_hp <- custom_ancova$p_value[custom_ancova$Covariate == "hp" & custom_ancova$Model == "Model_2"]
+
+print(paste("Base F-value (hp):", base_f_value_hp))
+print(paste("Custom F-value (hp):", custom_f_value_hp))
+
+print(paste("Base p-value (hp):", base_p_value_hp))
+print(paste("Custom p-value (hp):", custom_p_value_hp))
+
+
+# Base R ANCOVA
+base_ancova <- aov(mpg ~ wt + hp, data = mtcars)
+summary_base_ancova <- summary(base_ancova)
+
+# Using compare_ancova
+custom_ancova <- compare_ancova(
+  models = list(custom_model1, custom_model2),
+  covariates = c("wt", "hp"),
+  data = mtcars
+)
+
+
+# Extract numeric values for hp
+base_f_value_hp <- summary_base_ancova[[1]]$`F value`[2]
+base_p_value_hp <- summary_base_ancova[[1]]$`Pr(>F)`[2]
+
+custom_f_value_hp <- custom_ancova$F_value[custom_ancova$Covariate == "hp" & custom_ancova$Model == "Model_2"]
+custom_p_value_hp <- custom_ancova$p_value[custom_ancova$Covariate == "hp" & custom_ancova$Model == "Model_2"]
+
+# Compare numeric values
+f_value_hp_comparison <- all.equal(custom_f_value_hp, base_f_value_hp, tolerance = 1e-5)
+p_value_hp_comparison <- all.equal(custom_p_value_hp, base_p_value_hp, tolerance = 1e-5)
+
+print(paste("F-value comparison for hp:", f_value_hp_comparison))
+print(paste("P-value comparison for hp:", p_value_hp_comparison))
+
+# Benchmark ANCOVA (numeric values only)
+bench_ancova <- bench::mark(
+  compare_ancova = {
+    compare_ancova(models = list(custom_model1, custom_model2), covariates = c("wt", "hp"), data = mtcars)$F_value[custom_ancova$Covariate == "hp" & custom_ancova$Model == "Model_2"]
+  },
+  base_ancova = {
+    summary(aov(mpg ~ wt + hp, data = mtcars))[[1]]$`F value`[2]
+  },
+  iterations = 100
+)
+
+print("ANCOVA Numeric Value Benchmark:")
+print(bench_ancova)
+```
+
+### ANCOVA with Non-Nested Models
+
+**Simulation**
+```{r}
+set.seed(456)
+sim_data2 <- data.frame(
+  y = rnorm(500, mean = 100, sd = 15),
+  x1 = rnorm(500, mean = 50, sd = 10),
+  x2 = rnorm(500, mean = 30, sd = 5),
+  group = factor(sample(1:3, 500, replace = TRUE))
+)
+```
+```{r}
+# Base R ANCOVA
+lm_model1 <- lm(y ~ x1, data = sim_data2)
+lm_model2 <- lm(y ~ x1 + x2, data = sim_data2)
+anova_results <- anova(lm_model1, lm_model2)
+print(anova_results)
+
+
+# Using ANCOVA.xx
+model1_sim2 <- run_regression(sim_data2, response = "y", predictors = c("x1"))
+model2_sim2 <- run_regression(sim_data2, response = "y", predictors = c("x1", "x2"))
+ancova_results_sim2 <- compare_ancova(models = list(model1_sim2, model2_sim2), covariates = c("x1", "x2"), data = sim_data2)
+print(ancova_results_sim2)
+```

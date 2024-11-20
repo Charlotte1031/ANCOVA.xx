@@ -12,27 +12,38 @@ vignette: >
 This vignette demonstrates the workflow using `ANCOVA.xx` for running regressions, performing ANOVA/ANCOVA, and plotting results.
 
 ```{r example, echo = TRUE}
+# Load required package
 library(ANCOVA.xx)
+
+# Load example dataset
 data(mtcars)
 
-# 1. Run Regression
+# Step 1: Run Regressions
+# Model 1: mpg ~ wt
 model1 <- run_regression(mtcars, response = "mpg", predictors = c("wt"))
+
+# Model 2: mpg ~ wt + hp
 model2 <- run_regression(mtcars, response = "mpg", predictors = c("wt", "hp"))
 
-# 2. Perform ANOVA
+# Step 2: Perform ANOVA
+# Compare the models
 anova_results <- compare_anova(models = list(model1, model2))
+print("ANOVA Results:")
 print(anova_results)
 
-# 3. Perform ANCOVA
+# Step 3: Perform ANCOVA
+# Evaluate the effects of covariates wt and hp
 ancova_results <- compare_ancova(models = list(model1, model2), covariates = c("wt", "hp"), data = mtcars)
+print("ANCOVA Results:")
 print(ancova_results)
 
-# 4. Plot ANOVA
+# Step 4: Visualize ANOVA Results
+# Plot the regression for Model 1
 plot_anova(model1, data = mtcars, response = "mpg", predictor = "wt")
 
-# 5. Plot ANCOVA
+# Step 5: Visualize ANCOVA Results
+# Plot the regression with adjustment for covariates in Model 2
 plot_ancova(model2, data = mtcars, response = "mpg", predictor = "wt", covariate = "hp")
-
 
 ```
 

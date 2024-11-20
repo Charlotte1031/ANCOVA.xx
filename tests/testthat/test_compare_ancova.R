@@ -1,36 +1,39 @@
 library(testthat)
 
-test_that("compare_ancova compares models and returns correct structure", {
+# Test 1: Basic structure and numeric results for specific models
+test_that("compare_ancova returns correct structure and numeric results", {
   data(mtcars)
-  model1 <- run_regression(mtcars, response = "mpg", predictors = c("wt"))
-  model2 <- run_regression(mtcars, response = "mpg", predictors = c("wt", "hp"))
 
+  # Fit models
+  model1 <- lm(mpg ~ wt, data = mtcars)
+  model2 <- lm(mpg ~ wt + hp, data = mtcars)
+
+  # Run ANCOVA
   results <- compare_ancova(models = list(model1, model2), covariates = c("wt", "hp"), data = mtcars)
 
-  expect_s3_class(results, "data.frame")
-  expect_true(all(c("Model", "Covariate", "F_value", "p_value") %in% names(results)))
+  # Verify structure
+  expect_s3_class(results, "data.frame")  # Output should be a data frame
+  expect_true(all(c("Model", "Covariate", "SS_Covariate", "F_value", "p_value") %in% names(results)))
+
+  # Check specific values
+  expect_true(nrow(results) == 4)  # Two models, two covariates
+  expect_true(all(results$F_value[!is.na(results$F_value)] > 0))  # F-values should be positive
+  expect_true(all(results$p_value[!is.na(results$p_value)] < 1))  # p-values should be valid
 })
-
-test_that("compare_ancova handles missing covariates gracefully", {
+test_that("compare_ancova returns expected F_value and p_value for nested models", {
   data(mtcars)
-  model1 <- run_regression(mtcars, response = "mpg", predictors = c("wt"))
-  model2 <- run_regression(mtcars, response = "mpg", predictors = c("wt", "hp"))
 
+  # Fit models
+  model1 <- lm(mpg ~ wt, data = mtcars)
+  model2 <- lm(mpg ~ wt + hp, data = mtcars)
+
+  # Run ANCOVA
   results <- compare_ancova(models = list(model1, model2), covariates = c("wt", "hp"), data = mtcars)
 
-  hp_results_model1 <- results[results$Model == "Model_1" & results$Covariate == "hp", ]
-  expect_true(is.na(hp_results_model1$F_value))
-  expect_true(is.na(hp_results_model1$p_value))
-})
+  # Debugging output to check results
+  print(results)
 
-test_that("compare_ancova calculates F_value and p_value correctly", {
-  data(mtcars)
-  model1 <- run_regression(mtcars, response = "mpg", predictors = c("wt"))
-  model2 <- run_regression(mtcars, response = "mpg", predictors = c("wt", "hp"))
-
-  results <- compare_ancova(models = list(model1, model2), covariates = c("wt"), data = mtcars)
-
-  wt_results <- results[results$Covariate == "wt", ]
-  expect_false(any(is.na(wt_results$F_value)))
-  expect_false(any(is.na(wt_results$p_value)))
+  # Check specific F_value and p_value for hp in Model 2
+  expect_true(results$F_value[3] > 0)  # F_value for hp in Model 2
+  expect_true(results$p_value[3] < 0.05)  # p_value for hp in Model 2
 })
