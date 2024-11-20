@@ -1,5 +1,5 @@
 <!-- badges: start -->
-[![Codecov test coverage](https://codecov.io/gh/Charlotte1031/ANCOVA.xx/graph/badge.svg)](https://app.codecov.io/gh/Charlotte1031/ANCOVA.xx)
+[![R-CMD-check](https://github.com/Charlotte1031/ANCOVA.xx/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Charlotte1031/ANCOVA.xx/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 

@@ -1,5 +1,3 @@
-library(testthat)
-
 test_that("compare_ancova compares models and returns correct structure", {
   data(mtcars)
   model1 <- run_regression(mtcars, response = "mpg", predictors = c("wt"))

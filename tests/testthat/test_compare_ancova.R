@@ -1,6 +1,3 @@
-library(testthat)
-
-# Test 1: Basic structure and numeric results for specific models
 test_that("compare_ancova returns correct structure and numeric results", {
   data(mtcars)
 
