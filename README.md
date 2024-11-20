@@ -75,16 +75,31 @@ This package includes tests to validate the correctness of all functions. Compar
 ### Example usage:
 
 ```r
-# ANOVA example
-result_anova <- anova_function(data)
-anova_plot_function(result_anova)
+# Load package
+library(ANCOVA.xx)
 
-# ANCOVA example
-result_ancova <- ancova_function(data, covariate)
-ancova_plot_function(result_ancova)
+# Load dataset
+data(mtcars)
 
-# Regression example
-result_reg <- regression_function(data)
+# Step 1: Run Regressions
+model1 <- run_regression(mtcars, response = "mpg", predictors = c("wt"))
+model2 <- run_regression(mtcars, response = "mpg", predictors = c("wt", "hp"))
+
+# Step 2: Perform ANOVA
+anova_results <- compare_anova(models = list(model1, model2))
+print("ANOVA Results:")
+print(anova_results)
+
+# Step 3: Perform ANCOVA
+ancova_results <- compare_ancova(models = list(model1, model2), covariates = c("wt", "hp"), data = mtcars)
+print("ANCOVA Results:")
+print(ancova_results)
+
+# Step 4: Visualize ANOVA Results
+plot_anova(model1, data = mtcars, response = "mpg", predictor = "wt")
+
+# Step 5: Visualize ANCOVA Results
+plot_ancova(model2, data = mtcars, response = "mpg", predictor = "wt", covariate = "hp")
 ```
 
 #### Contributing
