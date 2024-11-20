@@ -1,8 +1,3 @@
-<!-- badges: start -->
-[![R-CMD-check](https://github.com/Charlotte1031/ANCOVA.xx/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Charlotte1031/ANCOVA.xx/actions/workflows/R-CMD-check.yaml)
-<!-- badges: end -->
-
-
 
 # Statistical Analysis Functions and Demo
 
@@ -73,13 +68,9 @@ The repository includes a vignette file Demo.Rmd to walk users through:
 
 Run the vignette file in R to follow along with the examples, which highlight real-world applications and provide practical insights.
 
-## Usage
+## Testing
 
-To use these functions:
-
-1.	Load your dataset into R.
-2.	Source the appropriate function file.
-3.	Call the function with your dataset as the input, specifying any additional parameters as needed.
+This package includes tests to validate the correctness of all functions. Comparisons are made against results from R’s built-in functions (e.g., aov(), lm()) using all.equal() for accuracy and bench::mark() for efficiency. Detailed test results and vignettes are available within the package.
 
 ### Example usage:
 
@@ -99,6 +90,10 @@ result_reg <- regression_function(data)
 #### Contributing
 
 Contributions are welcome! Please feel free to submit a pull request or open an issue if you have any improvements or bug fixes.
+
+	1.	Fork the repository.
+	2.	Create pull requests for new features or bug fixes.
+	3.	Submit feedback or feature requests via GitHub issues.
 
 #### License
 
